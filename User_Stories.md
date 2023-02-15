@@ -16,4 +16,5 @@ Log in authetication/token
 
 Lab Tech
 ---------
-Log in authentication/token 
+
+Patrick is a chemist who has obtained an NMR spectrum that was obtained at a 60 MHz 
