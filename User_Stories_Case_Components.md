@@ -133,26 +133,3 @@ Resource Tracking
 
 Communication with Outside Software
 
-Component Design and Ideas
-------
-
-```nmrsim```
-What it does: An open source python library that contains many functions for the design, synthetic development, and display of NMR spectra data.
-Inputs: See README for more details on the functions
-Outputs: Synthetic or experimental NMR data as plots or raw array data
-Interactions: User/ML tech would import this library to generate or interact with NMR spectra on the local machine
-
-```authenticate```
-What it does: Prompted to make edits to the code, user inputs a user and password that would grant them access to make changes to the software
-Inputs: Username and password
-Outputs: Access
-Interactions: User inputs a username and password
-
-```model.py```
-What it does: An output of the training of the machine learning model that can be imported to future notebooks or environments for ML predictions from experimental data
-Inputs: Directory for where experimental data is stored
-Outputs: A model for ML and an upscaled NMR spectra
-Interactions: User can specify what model (100, 200, 300 Mhz etc)
-
-
-
