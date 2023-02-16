@@ -1,3 +1,4 @@
+
 # NMR_Upscale_UW_DIRECT
 
 This is some test text
@@ -7,5 +8,8 @@ lkdajf;jda
 
 This is the changes Faiza added ^^
 
+
 Using nmrsim python library
 
+
+I added this through a fork 
