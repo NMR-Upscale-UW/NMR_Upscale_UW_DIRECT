@@ -46,6 +46,7 @@ Heather is in a high level leadership position in the organization. It is import
 ## Example Use Cases
 
 ML Technician
+--------
 * Technician receives more experimental data to input in the model
 	* Prompts to input data
 	* Able to validate new model performance
@@ -55,7 +56,6 @@ ML Technician
 	* Access to the code and workflow to add, train, and validate new model
 	* Output successfully is incorporated with the software
 
-
 Lab Tech
 --------
 * Patrick wants to select what upscaling method he would like to scale to
@@ -64,9 +64,10 @@ Lab Tech
 	* Patrick then makes the determination of what resolution he is confident and analyzes experimental results
 
 Lab Tech
--------
+
 * Patrick has both a 60 MHz and 400 MHz spectrum that he experimentally took
 	* He wants the option to add the data to a repository for inclusion for model performance
+
 
 Software Engineer
 ------
