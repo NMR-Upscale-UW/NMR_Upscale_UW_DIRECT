@@ -1,15 +1,13 @@
 
 # NMR_Upscale_UW_DIRECT
 
-This is some test text
-;alsdfjlaskd
-d;kafjalsdkfj
-lkdajf;jda
+##Resolut(I)on Up(S)caling f(O)r Spec(T)rosc(O)pic Im(P)lem(E)ntation
 
-This is the changes Faiza added ^^
+ISOTOPE
+
+First Steps
+------
+
+Using isotope.yml, create a copy of the python environment with required packages to run all code
 
 
-Using nmrsim python library
-
-
-I added this through a fork 
