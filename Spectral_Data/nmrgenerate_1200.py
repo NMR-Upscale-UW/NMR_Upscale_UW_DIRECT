@@ -19,7 +19,7 @@ import pandas
 res_1=1200
 res_2=60
 # Change this variable to specify number of data points to generate
-num_spec=10000
+num_spec=100
 
 # In[76]:
 
@@ -167,7 +167,7 @@ def write_nmr_spectra(index, num_peaks, x_res_1, y_res_1, x_res_2, y_res_2, res_
                                         f'{str(res_2)}MHz_ppm',
                                         f'{str(res_2)}MHz_intensity'])
     spectral_data[f'{str(res_1)}MHz_ppm'] = x_ppm_res_1
-    spectral_data[f'{str(res_1)}Hz_intensity'] = y_res_1
+    spectral_data[f'{str(res_1)}MHz_intensity'] = y_res_1
     spectral_data[f'{str(res_2)}MHz_ppm'] = x_ppm_res_2
     spectral_data[f'{str(res_2)}MHz_intensity'] = y_res_2
     filename=f"spectral_data/{str(res_1)}MHz/"+"spectral_data"+ "_"+str(num_peaks).zfill(2)+ "_" +str(index).zfill(5)+".csv"
