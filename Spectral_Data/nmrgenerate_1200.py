@@ -19,7 +19,7 @@ import pandas
 res_1=1200
 res_2=60
 # Change this variable to specify number of data points to generate
-num_spec=100
+num_spec=10000
 
 # In[76]:
 
