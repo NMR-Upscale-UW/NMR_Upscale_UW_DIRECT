@@ -11,3 +11,7 @@ First Steps
 Using isotope.yml, create a copy of the python environment with required packages to run all code
 
 
+* You can train and test the model using: ```bash train.sh```
+  * Edit the parameters in the ```train.sh`` script to your liking
+
+
