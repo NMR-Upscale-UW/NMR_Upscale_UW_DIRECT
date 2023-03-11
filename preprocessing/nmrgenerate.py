@@ -1,205 +1,65 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[69]:
-
-
-# Here we import all the necessary libraries to generate NMR spectra
-import matplotlib.pyplot as plt
-from nmrsim import Multiplet
-from random import randint, uniform
-import pandas
-
-
-# In[75]:
-
-
-# Change these variables to change resolutions of spectra generate
-# Notation is typically: res_1=higher and res_2=lower (integer input)
-res_1=1200
-res_2=60
-# Change this variable to specify number of data points to generate
-num_spec=20
-
-
-# In[76]:
-
-
-# Function to generate NMR signals based on input argument of spectrometer freq
-def NMR_Signal_Generator(spectrometer_frequencies):
-    '''
-    Takes input of list of 2 spectrometer frequencies in list format and
-    generates a list of NMR signals using nmrsim library. An NMR signal given
-    by this function is described by 1-4 (random), a 2Hz linewidth, a chemical
-    shift from 0.5 to 9, a J coupling of 3 to 15Hz, a multiplicity of 0 to 5
-    
-    Parameters
-    ----------
-        spectrometer_frequencies: List
-            List of 2 spectrometer frequencies
-            
-    Output
-    -------
-        signals_list: List
-            List of NMR signals of the two resolutions
-    
-    
-    '''
-    # Assigning number of protons defined by peak integral
-    integral = randint(1,4)
-    #Assigning the linewidth of an NMR peak in the spectrum
-    linewidth_hz = 2
-    # Randomly return a floating point chemical shift assignment
-    chemical_shift = uniform(0.5,9)
-    # Randomly return a floating point coupling (J coupling) frequency
-    coupling = uniform(3,15)
-    # Randomly select a multiplicity (peak splitting)
-    multiplicity = randint(0,5)
-    # Generate a list of NMR signals using the Multiplet function of nmrsim
-    signals_list = [(Multiplet(chemical_shift * frequency, integral, 
-                               [(coupling,multiplicity)], linewidth_hz)) for 
-                                frequency in spectrometer_frequencies]
-    return signals_list
-
-
-# In[77]:
-
-
-def create_random_spectra(num_peaks, res_1, res_2):
-    '''
-    Creates random NMR spectra given number of peaks desired, resolution 1
-    and resolution 2
-    
-    Parameters
-    -----------
-        num_peaks: int
-            Number of peaks in random spectrum
-        res_1: int
-            First desired resolution in MHz
-        res_2: int
-            Second desired resolution in MHz
-    
-    Output
-    -------
-        x_res_1: float
-            Chemical shift in ppm of spectrum 1
-        y_res_1: float
-            Intensity of spectrum 1
-        x_res_2: float
-            Chemical shift in ppm of spectrum 2
-        y_res_2: float
-            Intensity of spectrum
-    
-
-    '''
-    # Assigns desired NMR frequencies to a list
-    spectrometer_frequencies = [res_1,res_2]
-    # Creates blank dataframe with desired NMR frequencies column
-    spectral_data = pandas.DataFrame(columns=[f'{str(res_1)}MHz', f'{str(res_2)}MHz'])
-    
-    # Generates NMR Signals from NMRSIM using established list, generates
-    # spectra and puts them in spectral_data frame
-    for i in range(0,num_peaks):
-        signals_list = NMR_Signal_Generator(spectrometer_frequencies)
-        spectral_data.loc[len(spectral_data)] = signals_list
-
-    # Defines spectrum object, from Multiplet class
-    # Multiplets taken from spectral_data frequency df
-    spectrum_res_1 = Multiplet(0,0.5,[],2) 
-    for multiplet in spectral_data[f'{str(res_1)}MHz']:
-        spectrum_res_1 += multiplet
-        
-    # Process repeated for other frequency
-    spectrum_res_2 = Multiplet(0,0.5,[],2)
-    for multiplet in spectral_data[f'{str(res_2)}MHz']:
-        spectrum_res_2 += multiplet
-    
-    # Normalize the spectrometer frequencies and have n number of points on plots
-    spectrum_res_1.vmin = -0.5 * spectrometer_frequencies[0]
-    spectrum_res_1.vmax = 10.5 * spectrometer_frequencies[0]
-    x_res_1, y_res_1 = spectrum_res_1.lineshape(points=5500)
-
-    spectrum_res_2.vmin = -0.5 * spectrometer_frequencies[1]
-    spectrum_res_2.vmax = 10.5 * spectrometer_frequencies[1]
-    x_res_2, y_res_2 = spectrum_res_2.lineshape(points=5500)
-
-    return x_res_1, y_res_1, x_res_2, y_res_2
-
-
-# In[78]:
-
-
-def write_nmr_spectra(index, num_peaks, x_res_1, y_res_1, x_res_2, y_res_2, res_1, res_2):
-    '''
-    Writes generated NMR spectra to csv files
-    
-    Parameters
-    -----------
-        index: int
-            Label as integer of NMR spectrum generated in a series
-        num_peaks: int
-            Specifies how many peaks are desired in spectrum
-        x_res_1: float
-            Output of write spectrum, chemical shift of spectrum 1
-        x_res_2: float
-            Output of write spectrum, chemical shift of spectrum 2
-        y_res_1: float
-            Output of write spectrum, intensity of spectrum 1
-        y_res_2: float
-            Output of write spectrum, intensity of spectrum 2
-        res_1: int
-            Resolution in MHz of spectrum 1
-        res_2: int
-            Resolution in MHz of spectrum 2
-    
-    Output
-    -------
-        filename: csv
-            A csv containing the x, y data of spectra 1 and 2
-    
-    
-    '''
-    # Saving data to file
-    sf = [res_1,res_2]
-    x_ppm_res_1 = x_res_1/sf[0]
-    x_ppm_res_2 = x_res_2/sf[1]
-    spectral_data = pandas.DataFrame(columns=[f'{str(res_1)}MHz_ppm',
-                                        f'{str(res_1)}MHz_intensity', 
-                                        f'{str(res_2)}MHz_ppm',
-                                        f'{str(res_2)}MHz_intensity'])
-    spectral_data[f'{str(res_1)}MHz_ppm'] = x_ppm_res_1
-    spectral_data[f'{str(res_1)}MHz_intensity'] = y_res_1
-    spectral_data[f'{str(res_2)}MHz_ppm'] = x_ppm_res_2
-    spectral_data[f'{str(res_2)}MHz_intensity'] = y_res_2
-    filename=f"spectral_data/{str(res_1)}MHz/"+"spectral_data"+ "_"+str(num_peaks).zfill(2)+ "_" +str(index).zfill(5)+".csv"
-    print(filename)
-    spectral_data.to_csv(filename)
-
-
-# In[73]:
-
-
+from utils import create_random_spectra, write_nmr_spectra, folder2tensors
 import time
+import pandas as pd
+import os
+
+from random import randint
+import argparse
+import numpy as np
+import glob
 
 
-# In[79]:
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--low_resolution", type=int, default=60, help='The lower resolution to generate')
+    parser.add_argument("--high_resolution", type=int, default=400, help='The higher resolution to generate')
+    parser.add_argument("--num_spec", type=int, default=100, help='The number of data points to generate')
+    parser.add_argument("--data_dir", type=str, default='./data', help='Directory to save the data')
+
+    args = parser.parse_args()
+
+    # Change these variables to change resolutions of spectra generate
+    # Notation is typically: res_1=higher and res_2=lower (integer input)
+    res_1=args.high_resolution
+    res_2=args.low_resolution
+    num_spec=args.num_spec
+    # j = how many spectra do you want.
+    x = time.time()
+
+    print(f"Generating {num_spec} samples")
+    for j in range(num_spec):
+        print(f"Sample: {j+1}/{num_spec}", end='\r')
+        # num_peaks = Number of Peaks that you want in your spectra
+        num_peaks = randint(5,16)
+        #print(num_peaks)
+        x_res_1, y_res_1, x_res_2, y_res_2 = create_random_spectra(num_peaks, res_1, res_2)
+        write_nmr_spectra(j, num_peaks, x_res_1, y_res_1, x_res_2, y_res_2, res_1, res_2, data_dir=args.data_dir)
+
+    print(f'Time Elapsed: {round(time.time()-x, 5)} seconds')    
+
+    print(f'Now running featurization code...')    
+
+    ofilenames = glob.glob(os.path.join(args.data_dir, f"{res_1}MHz/*.csv"))
+    ofilenames.sort()
+    data_temp=pd.read_csv(ofilenames[0])
+    df_res_2 = np.zeros(shape=(len(ofilenames), len(data_temp.index)))
+    df_res_1 = np.zeros(shape=(len(ofilenames), len(data_temp.index)))
+
+    x= data_temp[f"{res_1}MHz_ppm"].to_numpy()
+
+    for index, f in enumerate(ofilenames):
+        data=pd.read_csv(f)
+        df_res_2[index]=data[f"{res_2}MHz_intensity"].to_numpy()
+        df_res_1[index]=data[f"{res_1}MHz_intensity"].to_numpy()
+    dfres_2 = pd.DataFrame(df_res_2,columns=x)
+    dfres_1 = pd.DataFrame(df_res_1,columns=x)
+    dfres_2.to_csv(os.path.join(args.data_dir, f"{res_1}MHz/*.csv"), index=False)
+    dfres_1.to_csv(os.path.join(args.data_dir, f"{res_1}MHz/*.csv"), index=False)
+    
 
 
-# num_peaks = Number of Peaks that you want in your spectra
-# j = how many spectra do you want.
-x = time.time()
-
-for j in range (0,num_spec):
-    num_peaks = randint(5,16)
-    #print(num_peaks)
-    x_res_1, y_res_1, x_res_2, y_res_2 = create_random_spectra(num_peaks, res_1, res_2)
-    write_nmr_spectra(j, num_peaks, x_res_1, y_res_1, x_res_2, y_res_2, res_1, res_2)
-
-print(f'Time Elapsed: {round(time.time()-x, 5)} seconds')    
-
-
-# In[ ]:
-
-
-
-
+    print("Now preprocess the folders and turn them into tensors")
+    folder2tensors(args.data_dir, args.high_resolution)
