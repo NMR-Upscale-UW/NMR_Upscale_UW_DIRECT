@@ -60,6 +60,5 @@ if __name__ == "__main__":
     dfres_1.to_csv(os.path.join(args.data_dir, f"{res_1}MHz/*.csv"), index=False)
     
 
-
     print("Now preprocess the folders and turn them into tensors")
     folder2tensors(args.data_dir, args.high_resolution)

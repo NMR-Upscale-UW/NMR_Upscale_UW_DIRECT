@@ -21,7 +21,7 @@ name2params = {
     'mlp': DotDict({
         'input_dim': 5500,
         'output_dim': 5500,
-        'hidden_dims': [1024, 128, 512, 512, 4000],
+        'hidden_dims': (1024, 128, 512, 512, 4000),
         'p_drop': 0.5,
         'lr': 0.001,
     }),
@@ -29,7 +29,7 @@ name2params = {
         'input_dim': 1,
         'output_dim': 1,
         # 'hidden_dims': [128, 128, 128, 128],
-        'hidden_dims': [64, 32],
+        'hidden_dims': (64, 32),
         'kernel_size': 7,
         'padding': 3,
         'p_drop': 0.1,

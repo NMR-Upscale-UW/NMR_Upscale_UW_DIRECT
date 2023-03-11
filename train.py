@@ -56,7 +56,7 @@ def test_loop(model, criterion, test_loader):
     return test_loss / len(test_loader), to_save
 
 
-def train_valid_loop(model, train_loader, valid_loader, optimizer, criterion, num_epochs, save_dir):
+def train_valid_loop(model, train_loader, valid_loader, optimizer, criterion, num_epochs):
     t0 = time.time()
     train_loss_epoch = []
     valid_loss_epoch = []
@@ -95,7 +95,7 @@ def train_valid_loop(model, train_loader, valid_loader, optimizer, criterion, nu
 def main(args):
     assert args.train_split + args.valid_split < 1, "Leave some space for test!"
 
-    args.save_dir = os.path.join(args.save_dir, args.model_name)
+    args.save_dir = os.path.join(args.save_dir, f"{args.high_resolution_frequency}MHz", args.model_name)
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
@@ -112,7 +112,10 @@ def main(args):
     # Establishing and loading data into notebook
     print("Loading Dataset...")
     dataset = GHzData(args.data_dir, args.high_resolution_frequency)
-    dset_size = len(dataset)
+    if args.limit_for_test == 1:
+        dset_size = 50
+    else:
+        dset_size = len(dataset)
     train_size = int(dset_size*args.train_split)
     valid_size = int(dset_size*args.valid_split)
     test_size = dset_size - train_size - valid_size
@@ -135,10 +138,10 @@ def main(args):
     # train model
     model.to(device)
     train_loss_epoch, valid_loss_epoch, best_model_ckpt = train_valid_loop(
-        model, train_dataloader, valid_dataloader, optimizer, criterion, args.num_epochs, args.save_dir
+        model, train_dataloader, valid_dataloader, optimizer, criterion, args.num_epochs
     )
 
-    best_model_ckpt['hyperparams'] = name2params[args.model_name]
+    best_model_ckpt['hyperparams'] = dict(name2params[args.model_name])
 
     print(f"Loading model with best validation performance")
     print(f"Avg Validation Loss: {best_model_ckpt['avg_valid_loss']} at epoch {best_model_ckpt['epoch']}")
@@ -163,6 +166,7 @@ if __name__ == "__main__":
     parser.add_argument('--train_split', type=float, default=0.7, help="The fraction of the entire dataset to use for the train set")
     parser.add_argument('--valid_split', type=float, default=0.15, help="The fraction of the entire dataset to use for the validation set")
     parser.add_argument('--save_dir', type=str, default='./results/', help="Where the results should be stored")
+    parser.add_argument('--limit_for_test', type=int, default=0, help="If 1 it will limit the number of samples in the dataset for faster testing")
 
     args = parser.parse_args()
     
