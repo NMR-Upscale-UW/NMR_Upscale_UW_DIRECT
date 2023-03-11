@@ -24,6 +24,7 @@ def regression_dataset_loop(model, optimizer, criterion, loader, is_train):
     running_loss = 0
     per_batch_loss = []
     for index, (inputs, labels) in enumerate(loader):
+        print(f"{index+1}/{len(loader)}", end='\r')
         # Make sure model and data are on the same device
         N, L, C = inputs.shape
         inputs = inputs.to(device)
@@ -40,43 +41,64 @@ def regression_dataset_loop(model, optimizer, criterion, loader, is_train):
         running_loss += loss.item()
         per_batch_loss.append(loss.item())
     epoch_loss = running_loss / len(loader)
-    return epoch_loss, per_batch_loss
+    return epoch_loss, per_batch_loss, model
 
 def test_loop(model, criterion, test_loader):
     model.eval() # Model to evaluation mode
     test_loss = 0.0
     to_save = []
-    for inputs, labels in test_loader:
+    for index, (inputs, labels) in enumerate(test_loader):
+        print(f"{index+1}/{len(test_loader)}", end='\r')
         outputs = model(inputs)
         loss = criterion(outputs, labels)
         test_loss += loss.item() 
-        to_save.append((inputs, outputs, loss.item()))
+        to_save.append((inputs, outputs, labels, loss.item()))
     return test_loss / len(test_loader), to_save
 
 
-def train_valid_loop(model, train_loader, valid_loader, optimizer, criterion, num_epochs):
+def train_valid_loop(model, train_loader, valid_loader, optimizer, criterion, num_epochs, save_dir):
     t0 = time.time()
     train_loss_epoch = []
     valid_loss_epoch = []
+    best_valid_loss = float("inf")
+    best_state_dict = None
+    best_epoch = 0
     for e in range(num_epochs):
         # Run train loop
-        tepoch_loss, tper_batch_loss = regression_dataset_loop(
+        print(f"Train Epoch {e}")
+        tepoch_loss, tper_batch_loss, model = regression_dataset_loop(
             model, optimizer, criterion, train_loader, True)
         train_loss_epoch.append(tepoch_loss)
 
         # Run validation loop
+        print(f"Validation Epoch {e}")
         with torch.no_grad():
-            vepoch_loss, vper_batch_loss = regression_dataset_loop(
+            vepoch_loss, vper_batch_loss, model = regression_dataset_loop(
                 model, optimizer, criterion, valid_loader, False)
+        if vepoch_loss < best_valid_loss: #save the model with the best validation loss
+            # torch.save(
+            #     {'epoch': e, 'avg_valid_loss':vepoch_loss, 'state_dict': model.state_dict()}, os.path.join(save_dir, 'best_model.pt'))
+            best_state_dict = model.state_dict()
+            best_epoch = e
+            best_valid_loss = vepoch_loss
         valid_loss_epoch.append(vepoch_loss)
     
         if(int(e) % PRINT_EVERY_N) == 0:
             print(f'[{round(time.time()-t0, 5)} s] Epoch {e} loss: {vepoch_loss :.4f}')
     print(f'Time Elapsed: {round(time.time()-t0, 5)} seconds')
-    return model
+    return train_loss_epoch, valid_loss_epoch, {
+        'epoch': best_epoch,
+        'avg_valid_loss': best_valid_loss,
+        'state_dict': best_state_dict,
+    }
 
 def main(args):
     assert args.train_split + args.valid_split < 1, "Leave some space for test!"
+
+    args.save_dir = os.path.join(args.save_dir, args.model_name)
+    if not os.path.exists(args.save_dir):
+        os.makedirs(args.save_dir)
+
     if args.model_name in name2params.keys():
         params = name2params[args.model_name]
         model = name2model[args.model_name](params)
@@ -88,6 +110,7 @@ def main(args):
     optimizer = torch.optim.RMSprop(model.parameters(), lr=params.lr) # Optimization function
 
     # Establishing and loading data into notebook
+    print("Loading Dataset...")
     dataset = GHzData(args.data_dir, args.high_resolution_frequency)
     dset_size = len(dataset)
     train_size = int(dset_size*args.train_split)
@@ -107,29 +130,39 @@ def main(args):
 
     train_dataloader = DataLoader(train_set, batch_size=32, shuffle=True)
     valid_dataloader = DataLoader(valid_set, batch_size=32, shuffle=True)
-    test_dataloader = DataLoader(test_set, batch_size=128, shuffle=True)
+    test_dataloader = DataLoader(test_set, batch_size=1, shuffle=True)
 
     # train model
     model.to(device)
-    optimized_model = train_valid_loop(
-        model, train_dataloader, valid_dataloader, optimizer, criterion, args.num_epochs
+    train_loss_epoch, valid_loss_epoch, best_model_ckpt = train_valid_loop(
+        model, train_dataloader, valid_dataloader, optimizer, criterion, args.num_epochs, args.save_dir
     )
 
-    test_epoch_loss, to_save = test_loop(
-        optimized_model, criterion, test_dataloader)
+    best_model_ckpt['hyperparams'] = name2params[args.model_name]
 
-    print(f"TEST AVG Loss: {test_epoch_loss}")
-    torch.save(to_save, "predictions.pt")
+    print(f"Loading model with best validation performance")
+    print(f"Avg Validation Loss: {best_model_ckpt['avg_valid_loss']} at epoch {best_model_ckpt['epoch']}")
+    model.load_state_dict(best_model_ckpt['state_dict'])
+    test_epoch_loss, to_save = test_loop(model, criterion, test_dataloader)
+
+    print(f"Avg Test Loss: {test_epoch_loss}")
+    torch.save(
+        {'train_loss': train_loss_epoch, 'valid_loss': valid_loss_epoch},
+        os.path.join(args.save_dir, "loss_curves.pt")
+    )
+    torch.save(best_model_ckpt, os.path.join(args.save_dir, "best_model.pt"))
+    torch.save(to_save, os.path.join(args.save_dir, "predictions.pt"))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', type=str, default='mlp')
-    parser.add_argument('--num_epochs', type=int, default=30)
-    parser.add_argument('--high_resolution_frequency', type=int, default=400)
-    parser.add_argument('--data_dir', type=str, default='./data/')
-    parser.add_argument('--random_key', type=int, default=12345)
-    parser.add_argument('--train_split', type=float, default=0.7)
-    parser.add_argument('--valid_split', type=float, default=0.15)
+    parser.add_argument('--model_name', type=str, default='mlp', help="The name of the model you implemented in models.py")
+    parser.add_argument('--num_epochs', type=int, default=30, help="How many epochs to train/validate the model")
+    parser.add_argument('--high_resolution_frequency', type=int, default=400, help="What resolution to upscale the 60MHz measurement to")
+    parser.add_argument('--data_dir', type=str, default='./data/', help="Where the dataset is stored")
+    parser.add_argument('--random_key', type=int, default=12345, help="The random seed/key to use for reproducibility")
+    parser.add_argument('--train_split', type=float, default=0.7, help="The fraction of the entire dataset to use for the train set")
+    parser.add_argument('--valid_split', type=float, default=0.15, help="The fraction of the entire dataset to use for the validation set")
+    parser.add_argument('--save_dir', type=str, default='./results/', help="Where the results should be stored")
 
     args = parser.parse_args()
     
