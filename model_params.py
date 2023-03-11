@@ -28,8 +28,10 @@ name2params = {
     'cnn': DotDict({
         'input_dim': 1,
         'output_dim': 1,
-        'hidden_dims': [128, 128, 128, 128],
-        'kernel_size': 3,
+        # 'hidden_dims': [128, 128, 128, 128],
+        'hidden_dims': [64, 32],
+        'kernel_size': 7,
+        'padding': 3,
         'p_drop': 0.1,
         'lr': 0.001,
     }),
