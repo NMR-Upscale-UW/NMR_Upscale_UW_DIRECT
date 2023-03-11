@@ -9,7 +9,7 @@ The module is divided into the following sections:
 5) Final loss
 '''
 # Setup
-# Loading in libraries necessary for CNN
+# Loading in libraries necessary for VAE
 import torch
 import torch.nn as nn
 import numpy as np
@@ -48,8 +48,7 @@ class GHzData(Dataset):
     '''
     def __init__(self):
         '''
-        extract desired spectras from the dataset
-        Example: 60MHz data vs 400MHz data
+        Load data from directory(csv files) and processing data into tensor
         '''
         # Data loading starting with list of csv strings
         self.files = glob.glob(os.path.join('./Spectral_Data/spectral_data/400MHz', 
@@ -77,6 +76,7 @@ class GHzData(Dataset):
     def __getitem__(self, index):  
         '''
         establishes an index for the tensors
+        :param index:get item from tensor based on index
         '''
         return self.tensor_60[index], self.tensor_400[index]
     
@@ -86,7 +86,7 @@ class GHzData(Dataset):
         '''
         return self.num_samples
     
-# Model Fitting
+# Training Loss from fitting model
 def fit(model, dataloader, optimizer, criterion):
     '''
     With the model we had fitted and trained, compute the loss
@@ -141,7 +141,7 @@ def validate(model, dataloader, criterion):
 def final_loss(bce_loss, mu, logvar):
     """
     This function will add the reconstruction loss (BCELoss) and the 
-    KL-Divergence.
+    KL-Divergence as the final loss.
     KL-Divergence = 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     :param bce_loss: recontruction loss
     :param mu: the mean from the latent vector
@@ -161,7 +161,7 @@ class LinearVAE(nn.Module):
     '''
     def __init__(self,trial):
         '''
-        Encoding data
+        Inherits from nn.Module then encode & decode features
         '''
         super(LinearVAE, self).__init__()
  
@@ -172,8 +172,10 @@ class LinearVAE(nn.Module):
         # decoder 
         self.dec1 = nn.Linear(in_features=features, out_features=encode)
         self.dec2 = nn.Linear(in_features=encode, out_features=5500)
+    
     def reparameterize(self, mu, log_var):
         """
+        Reparameterize the mu fom encoder
         :param mu: mean from the encoder's latent space
         :param log_var: log variance from the encoder's latent space
         """
@@ -184,7 +186,7 @@ class LinearVAE(nn.Module):
  
     def forward(self, x):
         '''
-        Reparameterization of the feature values and decoding
+        Forward propagation of the feature values
         '''
         x = x.view(-1, 5500)
         x = x.unsqueeze(1)
