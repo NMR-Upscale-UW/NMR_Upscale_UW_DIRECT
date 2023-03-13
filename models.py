@@ -1,3 +1,8 @@
+'''
+This module contains 3 machine learning models: 1) MLP, 2)CNN, 3)ConvVAE.
+Models were made with pytorch framework.
+'''
+# Import essential packages
 import torch
 from torch import nn
 import math
@@ -26,7 +31,7 @@ class MLP(nn.Module): # MLP = Multi Layer Perceptron
     def forward(self, x):  
         return self.m(x)
 
-class CNN(nn.Module):
+class CNN(nn.Module):   # CNN = Convolutional Neural Networ
 
     def __init__(self, cfg):
         super().__init__()
@@ -51,7 +56,7 @@ class CNN(nn.Module):
     def forward(self, x):
         return self.m(x)
 
-class ConvVAE(nn.Module):
+class ConvVAE(nn.Module):   # Convolutional Variational Autoencoders (VAEs)
     def __init__(self, cfg):
         super(ConvVAE, self).__init__()
 
@@ -84,7 +89,9 @@ class ConvVAE(nn.Module):
         return reconstruction, mu, log_var
 
 class PositionalEncoding(nn.Module):
-
+    '''
+    Adds signal to the input so that each position is assigned a unique representation.
+    '''
     def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5500):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -107,7 +114,7 @@ class PositionalEncoding(nn.Module):
 
         return self.dropout(x)
 
-class TransformerModel(nn.Module):
+class TransformerModel(nn.Module):  #Transformer Model
 
     def __init__(self, cfg):
         
@@ -145,8 +152,7 @@ class TransformerModel(nn.Module):
 
         return output
 
-
-
+#Model Names
 name2model = {
     'mlp': MLP,
     'cnn': CNN,
