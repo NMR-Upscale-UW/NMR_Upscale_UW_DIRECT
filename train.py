@@ -16,6 +16,7 @@ PRINT_EVERY_N = 10
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def regression_dataset_loop(model, optimizer, criterion, loader, is_train):
+    model = model.to(device)
     if is_train:
         model.train()
     else:
@@ -44,11 +45,14 @@ def regression_dataset_loop(model, optimizer, criterion, loader, is_train):
     return epoch_loss, per_batch_loss, model
 
 def test_loop(model, criterion, test_loader):
+    model = model.to(device)
     model.eval() # Model to evaluation mode
     test_loss = 0.0
     to_save = []
     for index, (inputs, labels) in enumerate(test_loader):
         print(f"{index+1}/{len(test_loader)}", end='\r')
+        inputs = inputs.to(device)
+        labels = labels.to(device)
         outputs = model(inputs)
         loss = criterion(outputs, labels)
         test_loss += loss.item() 
