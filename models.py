@@ -50,7 +50,40 @@ class CNN(nn.Module):
     def forward(self, x):
         return self.m(x)
 
+class ConvVAE(nn.Module):
+    def __init__(self, cfg):
+        super(ConvVAE, self).__init__()
+
+        self.encoder = CNN(cfg['encoder'])
+        self.decoder = CNN(cfg['decoder'])
+        
+    def reparameterize(self, mu, log_var):
+        """
+        :param mu: mean from the encoder's latent space
+        :param log_var: log variance from the encoder's latent space
+        """
+        std = torch.exp(0.5*log_var) # standard deviation
+        eps = torch.randn_like(std) # `randn_like` as we need the same size
+        sample = mu + (eps * std) # sampling as if coming from the input space
+        return sample.unsqueeze(1)
+ 
+    def forward(self, x):
+        # encoding
+        x = self.encoder(x)
+
+        # get `mu` and `log_var`
+        mu = x[:, 0, :] 
+        log_var = x[:, 1, :]
+        # get the latent vector through reparameterization
+        z = self.reparameterize(mu, log_var)
+ 
+        # decoding
+        reconstruction = torch.sigmoid(self.decoder(z))
+        # reconstruction = reconstruction.unsqueeze(1)
+        return reconstruction, mu, log_var
+
 name2model = {
     'mlp': MLP,
     'cnn': CNN,
+    'conv_vae': ConvVAE,
 }

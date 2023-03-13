@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from torch.utils.data import Subset, DataLoader
 import os
+import json
 
 
 PRINT_EVERY_N = 10
@@ -44,7 +45,7 @@ def regression_dataset_loop(model, optimizer, criterion, loader, is_train):
     epoch_loss = running_loss / len(loader)
     return epoch_loss, per_batch_loss, model
 
-def test_loop(model, criterion, test_loader):
+def test_loop(model, criterion, test_loader, is_vae=False):
     model = model.to(device)
     model.eval() # Model to evaluation mode
     test_loss = 0.0
@@ -55,6 +56,8 @@ def test_loop(model, criterion, test_loader):
         labels = labels.to(device)
         outputs = model(inputs)
         loss = criterion(outputs, labels)
+        if is_vae:
+            outputs = outputs[0]
         test_loss += loss.item() 
         to_save.append((inputs, outputs, labels, loss.item()))
     return test_loss / len(test_loader), to_save
@@ -109,8 +112,23 @@ def main(args):
     else:
         raise ValueError(f"args.model_name should be one of {name2params.keys()}. Currently defined: {args.model_name}")
 
-    
-    criterion = nn.MSELoss()
+    if 'vae' in args.model_name: # if you are training a VAE you need to take into account the KL divergence as well
+        def vae_loss(outputs, labels):
+            """
+            This function will add the reconstruction loss (MSELoss) and the 
+            KL-Divergence of the latent representaiton.
+            KL-Divergence = 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
+            :param bce_loss: recontruction loss
+            :param mu: the mean from the latent vector
+            :param logvar: log variance from the latent vector
+            """
+            pred, mu, logvar = outputs
+            MSE = torch.nn.functional.mse_loss(pred, labels)
+            KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+            return MSE + KLD
+        criterion = vae_loss
+    else:
+        criterion = nn.MSELoss()
     optimizer = torch.optim.RMSprop(model.parameters(), lr=params.lr) # Optimization function
 
     # Establishing and loading data into notebook
@@ -145,12 +163,12 @@ def main(args):
         model, train_dataloader, valid_dataloader, optimizer, criterion, args.num_epochs
     )
 
-    best_model_ckpt['hyperparams'] = dict(name2params[args.model_name])
+    # best_model_ckpt['hyperparams'] = dict(name2params[args.model_name])
 
     print(f"Loading model with best validation performance")
     print(f"Avg Validation Loss: {best_model_ckpt['avg_valid_loss']} at epoch {best_model_ckpt['epoch']}")
     model.load_state_dict(best_model_ckpt['state_dict'])
-    test_epoch_loss, to_save = test_loop(model, criterion, test_dataloader)
+    test_epoch_loss, to_save = test_loop(model, criterion, test_dataloader, 'vae' in args.model_name)
 
     print(f"Avg Test Loss: {test_epoch_loss}")
     torch.save(
@@ -159,6 +177,10 @@ def main(args):
     )
     torch.save(best_model_ckpt, os.path.join(args.save_dir, "best_model.pt"))
     torch.save(to_save, os.path.join(args.save_dir, "predictions.pt"))
+
+    with open(os.path.join(args.save_dir, "hyperparams.json"), "w") as f:
+        f.write(json.dumps(dict(name2params[args.model_name]), indent=4))
+        f.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

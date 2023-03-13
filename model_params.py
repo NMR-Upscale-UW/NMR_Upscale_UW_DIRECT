@@ -35,5 +35,26 @@ name2params = {
         'p_drop': 0.1,
         'lr': 0.001,
     }),
+    'conv_vae': DotDict({
+        'encoder': {
+            'input_dim': 1,
+            'output_dim': 2,
+            # 'hidden_dims': [128, 128, 128, 128],
+            'hidden_dims': (16, 16),
+            'kernel_size': 3,
+            'padding': 1,
+            'p_drop': 0.0,
+        },
+        'decoder': {
+            'input_dim': 1,
+            'output_dim': 1,
+            # 'hidden_dims': [128, 128, 128, 128],
+            'hidden_dims': (16, 16),
+            'kernel_size': 3,
+            'padding': 1,
+            'p_drop': 0.0,
+        },
+        'lr': 0.001,
+    }),
 
 }
