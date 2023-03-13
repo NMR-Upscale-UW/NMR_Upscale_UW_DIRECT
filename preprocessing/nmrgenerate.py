@@ -1,5 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
+'''
+This module generates different NMR spectra data and save them to csv fiels.
+'''
+# Import essential packages
 from utils import create_random_spectra, write_nmr_spectra, folder2tensors
 import time
 import pandas as pd
@@ -30,6 +32,7 @@ if __name__ == "__main__":
     x = time.time()
 
     print(f"Generating {num_spec} samples")
+    # Create spectra data
     for j in range(num_spec):
         print(f"Sample: {j+1}/{num_spec}", end='\r')
         # num_peaks = Number of Peaks that you want in your spectra
@@ -41,7 +44,7 @@ if __name__ == "__main__":
     print(f'Time Elapsed: {round(time.time()-x, 5)} seconds')    
 
     print(f'Now running featurization code...')    
-
+    # Store generated data
     ofilenames = glob.glob(os.path.join(args.data_dir, f"{res_1}MHz/*.csv"))
     ofilenames.sort()
     data_temp=pd.read_csv(ofilenames[0])
@@ -49,7 +52,7 @@ if __name__ == "__main__":
     df_res_1 = np.zeros(shape=(len(ofilenames), len(data_temp.index)))
 
     x= data_temp[f"{res_1}MHz_ppm"].to_numpy()
-
+    # Data conversion
     for index, f in enumerate(ofilenames):
         data=pd.read_csv(f)
         df_res_2[index]=data[f"{res_2}MHz_intensity"].to_numpy()
