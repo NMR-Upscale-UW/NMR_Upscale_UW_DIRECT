@@ -1,3 +1,6 @@
+'''
+This module contains the training process of machine learing model,
+'''
 # Import essential packages
 import argparse
 import random
