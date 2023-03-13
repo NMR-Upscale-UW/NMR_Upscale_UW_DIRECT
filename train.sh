@@ -7,4 +7,3 @@ python train.py \
 --train_split 0.7 \
 --valid_split 0.15 \
 --save_dir 'results/' \
---limit_for_test  \
