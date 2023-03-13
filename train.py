@@ -1,3 +1,4 @@
+# Import essential packages
 import argparse
 import random
 import torch
@@ -12,11 +13,26 @@ from torch.utils.data import Subset, DataLoader
 import os
 import json
 
-
+# Device Setting
 PRINT_EVERY_N = 10
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+# Regression Dataset Loop
 def regression_dataset_loop(model, optimizer, criterion, loader, is_train):
+    '''
+    This function returns the model's epoch loss and per batch loss
+
+    Args:
+        model: the selected training model
+        optimizer: the generated optimizer
+        criterion: the mean absolute value between n elements in the input and the output
+        loader: yhe data loader
+    
+    Returns:
+        epoch_loss: loss of each epoch
+        per_batch_loss: loss of per batch
+        model: the training model
+    '''
     model = model.to(device)
     if is_train:
         model.train()
@@ -45,7 +61,20 @@ def regression_dataset_loop(model, optimizer, criterion, loader, is_train):
     epoch_loss = running_loss / len(loader)
     return epoch_loss, per_batch_loss, model
 
+# Testing Loop
 def test_loop(model, criterion, test_loader, is_vae=False):
+    '''
+    This function computes the model's training loss.
+
+    Args:
+        model: the testing model
+        criterion: the mean absolute value between n elements in the input and the output
+        test_loader: the test data loader
+        is_vae(boolean): check if the model is the VAE model
+    Return:
+        test_loss: the testing loss
+        to_save: floated criterion along with associated input, ouput, and label 
+    '''
     model = model.to(device)
     model.eval() # Model to evaluation mode
     test_loss = 0.0
@@ -62,8 +91,25 @@ def test_loop(model, criterion, test_loader, is_vae=False):
         to_save.append((inputs, outputs, labels, loss.item()))
     return test_loss / len(test_loader), to_save
 
-
+# Model Training and Validation
 def train_valid_loop(model, train_loader, valid_loader, optimizer, criterion, num_epochs):
+    '''
+    This functions computes the model's training and validation loss of each epoch,
+    as well as the best state of the model.
+    Args:
+        model: the training and validation model
+        train_loader: training data loader
+        valid_loader: validation data loader
+        optimizer: the generated optimizer
+        criterion: the mean absolute value between n elements in the input and the output
+        num_epochs: number of epochs
+    Returns:
+        train_loss_epoch: training loss of the epoch
+        valid_loss_epoch: validation loss of the epoch
+        best_epoch: the best number of epoch asmong the epochs
+        best_valid_loss: the best validation loss
+        best_state_dict: the dictionary that contains the best state of the model
+    '''
     t0 = time.time()
     train_loss_epoch = []
     valid_loss_epoch = []
@@ -98,8 +144,11 @@ def train_valid_loop(model, train_loader, valid_loader, optimizer, criterion, nu
         'avg_valid_loss': best_valid_loss,
         'state_dict': best_state_dict,
     }
-
+ 
 def main(args):
+    '''
+    The main interaction of model training process.
+    '''
     assert args.train_split + args.valid_split < 1, "Leave some space for test!"
 
     args.save_dir = os.path.join(args.save_dir, f"{args.high_resolution_frequency}MHz", args.model_name)
