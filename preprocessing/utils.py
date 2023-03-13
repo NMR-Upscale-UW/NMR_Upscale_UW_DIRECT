@@ -9,6 +9,9 @@ from random import randint, uniform
 
 import time
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using {device} device")
+
 def folder2tensors(data_dir, high_res):
     # Data loading starting with list of csv strings
     files = glob.glob(os.path.join(data_dir, f'{high_res}MHz', 'spectral_data_*.csv'))
@@ -26,9 +29,9 @@ def folder2tensors(data_dir, high_res):
         y_high.append(array_high) # Appends all arrays to 400MHz list
         
     # Creates a 60 MHz tensor from list, converts to float, unsqueezes to have shape (n, 1, 5500)
-    tensor_low = torch.Tensor(y_low).float().unsqueeze(1)
+    tensor_low = torch.Tensor(y_low).float().unsqueeze(1).to(device)
     # Creates a high resolution MHz tensor from list, converts to float, unsqueezes to have shape (n, 1, 5500)
-    tensor_high = torch.Tensor(y_high).float().unsqueeze(1)
+    tensor_high = torch.Tensor(y_high).float().unsqueeze(1).to(device)
 
     torch.save(
         {'low': tensor_low, 'high': tensor_high}, 
