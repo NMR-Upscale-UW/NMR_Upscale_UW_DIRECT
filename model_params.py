@@ -17,7 +17,7 @@ class DotDict(dict):
                 value = DotDict(value)
             self[key] = value
 
-name2params = {
+name2params = { #Use this dictionary to access model's hyperparameters!
     'mlp': DotDict({
         'input_dim': 5500,
         'output_dim': 5500,
@@ -54,6 +54,16 @@ name2params = {
             'padding': 1,
             'p_drop': 0.0,
         },
+        'lr': 0.001,
+    }),
+    'transformer': DotDict({
+        'input_dim': 1,
+        'd_model': 4,
+        'nhead': 2,
+        'd_hid': 8,
+        'nlayers': 2,
+        'padding': 3,
+        'p_drop': 0.3,
         'lr': 0.001,
     }),
 
