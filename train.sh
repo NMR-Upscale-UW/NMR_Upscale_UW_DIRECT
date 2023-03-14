@@ -1,5 +1,5 @@
 python train.py \
---model_name 'cnn' \
+--model_name 'transformer' \
 --num_epochs 30 \
 --high_resolution_frequency 400 \
 --data_dir './data/' \

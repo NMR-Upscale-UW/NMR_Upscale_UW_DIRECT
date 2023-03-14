@@ -205,8 +205,8 @@ def main(args):
     valid_set = Subset(dataset, valid_indices)
     test_set = Subset(dataset, test_indices)
 
-    train_dataloader = DataLoader(train_set, batch_size=32, shuffle=True)
-    valid_dataloader = DataLoader(valid_set, batch_size=32, shuffle=True)
+    train_dataloader = DataLoader(train_set, batch_size=1, shuffle=True)
+    valid_dataloader = DataLoader(valid_set, batch_size=1, shuffle=True)
     test_dataloader = DataLoader(test_set, batch_size=1, shuffle=True)
 
     # train model

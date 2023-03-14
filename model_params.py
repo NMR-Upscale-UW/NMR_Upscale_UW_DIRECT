@@ -61,7 +61,7 @@ name2params = { #Use this dictionary to access model's hyperparameters!
         'd_model': 4,
         'nhead': 2,
         'd_hid': 8,
-        'nlayers': 2,
+        'nlayers': 1,
         'padding': 3,
         'p_drop': 0.3,
         'lr': 0.001,
