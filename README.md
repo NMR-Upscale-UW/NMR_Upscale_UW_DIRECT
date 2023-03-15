@@ -5,6 +5,11 @@
 
 ISOTOPE
 
+### Check out the project description!
+------
+
+Read it at: [project_plans/Airforce_VV.pdf](project_plans/Airforce_VV.pdf)
+
 ### Setup your python environment
 ------
 
