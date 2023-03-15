@@ -22,10 +22,11 @@ import pandas
 
 # Change these variables to change resolutions of spectra generate
 # Notation is typically: res_1=higher and res_2=lower (integer input)
-res_1=int(input('Input an Integer for High Resolution Spectrum: '))
-res_2=int(input('Input an Integer for Lower Resolution Spectrum: '))
+res_1=600
+res_2=60
 # Change this variable to specify number of data points to generate
-num_spec=int(input('Input an Integer for Quantity of Spectra Generated: '))
+num_spec=100
+
 
 # In[76]:
 
@@ -176,6 +177,7 @@ def write_nmr_spectra(index, num_peaks, x_res_1, y_res_1, x_res_2, y_res_2, res_
     spectral_data[f'{str(res_2)}MHz_ppm'] = x_ppm_res_2
     spectral_data[f'{str(res_2)}MHz_intensity'] = y_res_2
     filename=f"spectral_data/{str(res_1)}MHz/"+"spectral_data"+ "_"+str(num_peaks).zfill(2)+ "_" +str(index).zfill(5)+".csv"
+    print(filename)
     spectral_data.to_csv(filename)
 
 

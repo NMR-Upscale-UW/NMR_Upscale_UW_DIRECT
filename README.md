@@ -95,3 +95,8 @@ test/test_models.py ...                                                         
 
 ======================================= 3 passed in 0.94s ========================================
 ```
+
+
+# Our own explorations: 
+------
+We also included some exploratory approaches + hyperparameter optimization code in the ```exploratory/``` directory. It includes notebooks that generate data and even our initial tests with using Generative Adversarial Networks (GANs) to our problem.
