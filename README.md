@@ -49,3 +49,43 @@ Using isotope.yml, create a copy of the python environment with required package
 You can either:
 1. Change the model parameters in ```model_parameters.py``` for each of the already implemented models (easiest).
 2. Implement your own model in ```models.py``` and put your class initialization parameters into the ```name2params``` dictionary in ```model_parameters.py```. Then you should add the model class spec + name into the ```name2model``` dictionary in ```models.py```.
+
+### The base implementation includes unittests 
+------
+We included unittests to the base model development implementation. You can run them with the following commands: 
+- ```pytest test/test_datasets.py```
+Should return something like: 
+```
+====================================== test session starts =======================================
+platform darwin -- Python 3.6.12, pytest-6.2.4, py-1.11.0, pluggy-0.13.1
+rootdir: /Users/davinan/Dropbox/classes/dscience/NMR_Upscale_UW_DIRECT
+collected 1 item
+
+test/test_datasets.py .                                                                    [100%]
+
+======================================= 1 passed in 3.98s ========================================
+```
+- ```pytest test/test_train.py```
+Should return something like: 
+```
+====================================== test session starts =======================================
+platform darwin -- Python 3.6.12, pytest-6.2.4, py-1.11.0, pluggy-0.13.1
+rootdir: /Users/davinan/Dropbox/classes/dscience/NMR_Upscale_UW_DIRECT
+collected 4 items
+
+test/test_train.py ....                                                                    [100%]
+
+======================================= 4 passed in 8.12s ========================================
+```
+- ```pytest test/test_models.py```
+Should return something like: 
+```
+====================================== test session starts =======================================
+platform darwin -- Python 3.6.12, pytest-6.2.4, py-1.11.0, pluggy-0.13.1
+rootdir: /Users/davinan/Dropbox/classes/dscience/NMR_Upscale_UW_DIRECT
+collected 3 items
+
+test/test_models.py ...                                                                    [100%]
+
+======================================= 3 passed in 0.94s ========================================
+```
