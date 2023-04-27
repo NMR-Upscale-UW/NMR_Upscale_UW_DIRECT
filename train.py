@@ -2,6 +2,7 @@
 This module contains the training process of machine learing model,
 '''
 # Import essential packages
+from comet_ml import Experiment
 import argparse
 import random
 import torch
@@ -148,7 +149,7 @@ def train_valid_loop(model, train_loader, valid_loader, optimizer, criterion, nu
         'state_dict': best_state_dict,
     }
  
-def main(args):
+def main(args, experiment):
     '''
     The main interaction of model training process.
     '''
@@ -215,6 +216,16 @@ def main(args):
         model, train_dataloader, valid_dataloader, optimizer, criterion, args.num_epochs
     )
 
+    # Log the custom metrics, parameters, and tags
+    experiment.log_metric("train_loss", tepoch_loss, step=e)
+    experiment.log_metric("valid_loss", vepoch_loss, step=e)
+    experiment.log_metric("avg_valid_loss", best_model_ckpt['avg_valid_loss'])
+    experiment.log_metric("best_epoch", best_model_ckpt['epoch'])
+    experiment.log_metric("avg_test_loss", test_epoch_loss)
+    experiment.log_parameters(dict(name2params[args.model_name]))
+    experiment.add_tags([args.model_name, f"{args.high_resolution_frequency}MHz"])
+
+    
     # best_model_ckpt['hyperparams'] = dict(name2params[args.model_name])
 
     print(f"Loading model with best validation performance")
@@ -255,4 +266,22 @@ if __name__ == "__main__":
     torch.cuda.manual_seed_all(args.random_key)
     os.environ["PL_GLOBAL_SEED"] = str(args.random_key)
 
-    main(args)
+    # Instantiate the experiment and set the desired options
+    experiment = Experiment(
+        api_key="gT6S0qZpb50idSfM01s4q2uQS",
+        project_name="CNN_model",
+        workspace="faizaab",
+        auto_metric_logging=True,
+        auto_param_logging=True,
+        log_graph=True,
+        auto_metric_step_rate=True,
+        parse_args=True,
+        auto_histogram_weight_logging=True,
+        auto_histogram_gradient_logging=True,
+        auto_histogram_activation_logging=True,
+        auto_histogram_epoch_rate=True,
+    )
+
+    # Execute the main function within the experiment's train context
+    with experiment.train():
+        main(args, experiment)
