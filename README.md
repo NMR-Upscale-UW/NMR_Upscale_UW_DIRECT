@@ -3,7 +3,7 @@
 
 
 
-![image info](https://github.com/NMR-Upscale-UW/NMR_Upscale_UW_DIRECT/tree/main/isotop/notebooks/imgs/proj_img.png?raw=true)
+![image info](https://github.com/NMR-Upscale-UW/NMR_Upscale_UW_DIRECT/isotop/notebooks/imgs/proj_img.png?raw=true)
 
 
 ### Check out the project description!
