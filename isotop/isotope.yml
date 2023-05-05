@@ -1,4 +1,5 @@
 name: isotope
+version: 1.2
 channels:
   - defaults
 dependencies:
