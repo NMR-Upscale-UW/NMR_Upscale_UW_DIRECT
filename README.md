@@ -3,7 +3,7 @@
 
 
 
-![image info](NMR_Upscale_UW_DIRECT/isotop/notebooks/imgs/proj_img.png)
+(NMR_Upscale_UW_DIRECT/isotop/notebooks/imgs/proj_img.png)
 
 
 ### Check out the project description!
