@@ -2,8 +2,7 @@
 # NMR_Upscale_UW_DIRECT
 
 
-
-![ISOTOP image](https://github.com/hsuan99/NMR_Upscale_UW/blob/NMR_Upscale_UW_DIRECT/isotop/notebooks/imgs/proj_img.jpg?raw=true)
+![ISOTOP image](https://raw.githubusercontent.com/NMR-Upscale-UW/NMR_Upscale_UW_DIRECT/main/isotop/notebooks/imgs/proj_img.png)
 
 
 ### Check out the project description!
